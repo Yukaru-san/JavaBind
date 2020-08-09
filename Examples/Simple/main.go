@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	javabind "github.com/Yukaru-san/JavaBind/Golang_Implementation"
+	"github.com/Yukaru-san/JavaBind/Golang_Implementation/javabind"
 )
 
 func main() {
