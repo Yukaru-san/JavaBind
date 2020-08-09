@@ -1,4 +1,4 @@
-package Golang_Implementation
+package javabind
 
 // MessageError handles errors using the message functions
 type MessageError struct {

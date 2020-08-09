@@ -30,7 +30,7 @@ public class GolangBinder {
     private boolean useAutomaticMessageReceiver = false;
     private boolean useManualMessageReceiver = false;
     
-    private Bindings customMessageBindings;
+    private Bindings customMessageBindings = null;
     
     
     // Keeps the current process alive and in position
@@ -50,7 +50,18 @@ public class GolangBinder {
     	currentlyKeepingAlive = false;
     }
     
+    
     // Connects to the Golang messaging server
+    public void ConnectToGolangServer() throws Exception {
+    	// Create connection
+        clientSocket = new DatagramSocket();
+        IPAddress = InetAddress.getByName(IP);
+        
+        // Send initial "hello"
+        SendMessage(CONNECTION_HELLO);
+    }
+    
+    // Connects to the Golang messaging server AND sets the messageHandler
     public void ConnectToGolangServer(Bindings messageHandler) throws Exception {
     	// Create connection
         clientSocket = new DatagramSocket();
@@ -63,6 +74,10 @@ public class GolangBinder {
         SendMessage(CONNECTION_HELLO);
     }
     
+    // Sets a custom Bindings interface
+    public void SetMessageBindings(Bindings messageHandler) {
+    	customMessageBindings = messageHandler;
+    }
     
     // Closes any current connection to Golang
     // Also sends a signal
@@ -129,6 +144,9 @@ public class GolangBinder {
     		throw new Exception("ReceiveNextMessage is already running. Only one is possible! You can close one by using StopMessageReceiver");
     	else if (useAutomaticMessageReceiver)
     		throw new Exception("StartMessageReceiver is already running. Only one is possible! You can close one by using StopMessageReceiver");
+    	else if (customMessageBindings == null) {
+    		throw new Exception("There are no Bindings to be called. Make sure to set them up before using StartMessageReceiver!");
+    	}
     	
     	 // Start Message Handler
         new Thread() {

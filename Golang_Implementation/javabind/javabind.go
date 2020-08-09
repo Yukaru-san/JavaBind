@@ -1,4 +1,4 @@
-package Golang_Implementation
+package javabind
 
 import (
 	"fmt"
@@ -26,7 +26,20 @@ var (
 	// variables
 	useAutomaticMessageReceiver bool
 	useManualMessageReceiver    bool
+
+	// DisconnectCallback will be called when losing connection (clientAddr, string)
+	disconnectCallback func(*net.UDPAddr, string)
+
+	// InvalidJarPath - Callback Reason
+	InvalidJarPath = "Invalid path to .jar file"
+	// ClientDisconnected - Callback Reason
+	ClientDisconnected = "Java client connection lost"
 )
+
+// SetDisconnectCallback sets the function that will be called upon errors (or client disconnect)
+func SetDisconnectCallback(callback func(*net.UDPAddr, string)) {
+	disconnectCallback = callback
+}
 
 // StartJavaServer starts the local server for Java clients to connect to
 func StartJavaServer(jarFile string) error {
@@ -47,15 +60,19 @@ func StartJavaServer(jarFile string) error {
 	serverIsRunning = true
 
 	// Run the java program
-	time.Sleep(time.Second)
-	var runJava *exec.Cmd
-	runJava = exec.Command("java", "-jar", jarFile)
-	//	runJava.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
-	err = runJava.Run()
-	if err != nil {
-		serverIsRunning = false
-		return err
-	}
+	go func() {
+		time.Sleep(time.Second)
+		var runJava *exec.Cmd
+		runJava = exec.Command("java", "-jar", jarFile)
+		err := runJava.Run()
+		if err != nil {
+			serverIsRunning = false
+			// Callback
+			if disconnectCallback != nil {
+				disconnectCallback(nil, InvalidJarPath)
+			}
+		}
+	}()
 
 	return nil
 }
@@ -130,7 +147,10 @@ func OnMessageReceived(execute func(string)) error {
 		if msgString == connectionHello {
 			javaClient = remoteAddr
 		} else if msgString == connectionGoodbye {
-			fmt.Println("JavaBind: -- Java client connection lost --")
+			// Callback
+			if disconnectCallback != nil {
+				disconnectCallback(javaClient, ClientDisconnected)
+			}
 		} else {
 			execute(msgString)
 		}
