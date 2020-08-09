@@ -171,9 +171,13 @@ public class GolangBinder {
           	    		}
           	        
           	    		// Take message and pass it on to the Message Handler
-          	    		String message = new String(receivePacket.getData());
+						String message = new String(receivePacket.getData());
+						
+						// Remove trailing null bytes
+						message = message.trim();
+
+						// Pass message to Handler
           	    		customMessageBindings.OnMessageReceived(message);
-          	    		
           	    	}
 				} catch (Exception e) {
 					e.printStackTrace();

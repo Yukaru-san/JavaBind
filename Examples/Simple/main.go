@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	// Start the Server and point towards the .jar file
-	err := javabind.StartJavaServer("test_Program.jar")
+	// Start the Server and point towards the .jar file -- true enables Java output
+	err := javabind.StartJavaServer("test_Program.jar", true)
 	if err != nil {
 		fmt.Println("Couldn't start the JavaServer. Is there already a server running?")
 		return
@@ -33,6 +33,6 @@ func main() {
 	javabind.OnMessageReceived(func(msg string) {
 		// Check the message's content and react
 		fmt.Printf("Received: %s \n", msg)
-		javabind.SendMessage("Some answer that's sent to Java")
+		javabind.SendMessage("Hi from Golang!")
 	})
 }
