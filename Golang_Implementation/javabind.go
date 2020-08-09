@@ -40,7 +40,6 @@ func StartJavaServer(jarFile string) error {
 	var err error
 	server, err = net.ListenUDP("udp", &addr)
 	if err != nil {
-		fmt.Printf("Some error %v\n", err)
 		return err
 	}
 
@@ -48,17 +47,15 @@ func StartJavaServer(jarFile string) error {
 	serverIsRunning = true
 
 	// Run the java program
-	go func() {
-		time.Sleep(time.Second)
-		var runJava *exec.Cmd
-		runJava = exec.Command("java", "-jar", jarFile)
-		//	runJava.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
-		err := runJava.Run()
-		if err != nil {
-			serverIsRunning = false
-			fmt.Println("error")
-		}
-	}()
+	time.Sleep(time.Second)
+	var runJava *exec.Cmd
+	runJava = exec.Command("java", "-jar", jarFile)
+	//	runJava.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
+	err = runJava.Run()
+	if err != nil {
+		serverIsRunning = false
+		return err
+	}
 
 	return nil
 }
