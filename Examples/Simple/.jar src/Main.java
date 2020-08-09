@@ -1,3 +1,4 @@
+// Note that you will need to create a reference to the javaBind library!
 public class Main {
 	
 	public static void main(String[] args) throws Exception {
