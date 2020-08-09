@@ -33,6 +33,6 @@ func main() {
 	javabind.OnMessageReceived(func(msg string) {
 		// Check the message's content and react
 		fmt.Printf("Received: %s \n", msg)
-		javabind.SendMessage("ok cool.")
+		javabind.SendMessage("Some answer that's sent to Java")
 	})
 }
