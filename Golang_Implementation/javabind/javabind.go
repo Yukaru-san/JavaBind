@@ -40,9 +40,9 @@ var (
 	ClientDisconnected = "Java client connection lost"
 )
 
-// SetDCallbackHandler sets the function that will be called upon errors (or client disconnect)
+// SetCallbackHandler sets the function that will be called on system events (login, logout, java error...)
 func SetCallbackHandler(callback func(*net.UDPAddr, string)) {
-	disconnectCallback = callback
+	callbackHandler = callback
 }
 
 // StartJavaServer starts the local server for Java clients to connect to
@@ -72,8 +72,8 @@ func StartJavaServer(jarFile string) error {
 		if err != nil {
 			serverIsRunning = false
 			// Callback
-			if disconnectCallback != nil {
-				disconnectCallback(nil, InvalidJarPath)
+			if callbackHandler != nil {
+				callbackHandler(nil, InvalidJarPath)
 			}
 		}
 	}()
@@ -150,11 +150,14 @@ func OnMessageReceived(execute func(string)) error {
 		// If msg is not the "hello" one, execute the given func
 		if msgString == connectionHello {
 			javaClient = remoteAddr
-			// TODO Callback call
+			// Callback
+			if callbackHandler != nil {
+				callbackHandler(javaClient, ClientConnected)
+			}
 		} else if msgString == connectionGoodbye {
 			// Callback
-			if disconnectCallback != nil {
-				disconnectCallback(javaClient, ClientDisconnected)
+			if callbackHandler != nil {
+				callbackHandler(javaClient, ClientDisconnected)
 			}
 		} else {
 			execute(msgString)
