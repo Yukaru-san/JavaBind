@@ -1,3 +1,5 @@
+// TODO Callback on everything -> remove Disconnectcallback, create SetCallback
+
 package javabind
 
 import (
@@ -27,17 +29,19 @@ var (
 	useAutomaticMessageReceiver bool
 	useManualMessageReceiver    bool
 
-	// DisconnectCallback will be called when losing connection (clientAddr, string)
-	disconnectCallback func(*net.UDPAddr, string)
+	// will be called upon special Events (connect, disconnect, java error)
+	callbackHandler func(*net.UDPAddr, string)
 
 	// InvalidJarPath - Callback Reason
 	InvalidJarPath = "Invalid path to .jar file"
+	// ClientConnected - Callback Reason
+	ClientConnected = "Java client connected"
 	// ClientDisconnected - Callback Reason
 	ClientDisconnected = "Java client connection lost"
 )
 
-// SetDisconnectCallback sets the function that will be called upon errors (or client disconnect)
-func SetDisconnectCallback(callback func(*net.UDPAddr, string)) {
+// SetDCallbackHandler sets the function that will be called upon errors (or client disconnect)
+func SetCallbackHandler(callback func(*net.UDPAddr, string)) {
 	disconnectCallback = callback
 }
 
@@ -146,6 +150,7 @@ func OnMessageReceived(execute func(string)) error {
 		// If msg is not the "hello" one, execute the given func
 		if msgString == connectionHello {
 			javaClient = remoteAddr
+			// TODO Callback call
 		} else if msgString == connectionGoodbye {
 			// Callback
 			if disconnectCallback != nil {
